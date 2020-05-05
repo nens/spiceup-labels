@@ -15,23 +15,23 @@ The following table lists the labeltypes, their users, uuid and use case.
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
 | Labeltype (model)       | User       | UUID                                 | Use case
 +=========================+============+======================================+=================================================================+
-| App data                | All        | 3ab1addf-00e5-47b0-849e-ba55cd3024b9 | Plot info from local measurements: parcel's location, plant age
+| App data                | All        | 3ab1addf-00e5-47b0-849e-ba55cd3024b9 | Plot info from local measurements: parcel's location, plant age |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Crop calendar tasks     | Farmer app | 3d77fb10-1a2c-40ef-8396-f2bc2cd638e1 | Farm specific tasks based on farm, season and soil conditions
+| Crop calendar tasks     | Farmer app | 3d77fb10-1a2c-40ef-8396-f2bc2cd638e1 | Farm specific tasks based on farm, season and soil conditions   |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Growth and health tasks | Farmer app | 495706f7-0f59-4eaf-a4d8-bf65946b7c62 | Self-reported info translated to improve plant growth and health
+| Growth and health tasks | Farmer app | 495706f7-0f59-4eaf-a4d8-bf65946b7c62 | Self-reported info translated to improve plant growth and health|
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Warning based tasks     | Farmer app | 025a748d-4507-4b13-98af-ecae696bbeac | Data triggered warnings on risks, e.g. drought / water excess
+| Warning based tasks     | Farmer app | 025a748d-4507-4b13-98af-ecae696bbeac | Data triggered warnings on risks, e.g. drought / water excess   |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Weather info (home)     | Farmer app | 8ef4c780-6995-4935-8bd3-73440a689fc3 | Weather indicators at the start screen of the app (raster data)
+| Weather info (home)     | Farmer app | 8ef4c780-6995-4935-8bd3-73440a689fc3 | Weather indicators at the start screen of the app (raster data) |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Weather info (all)      | Farmer app | a686583a-da6c-40da-a001-32ed7412655b | Detailed weather forecast for the cominig week (raster data)
+| Weather info (all)      | Farmer app | a686583a-da6c-40da-a001-32ed7412655b | Detailed weather forecast for the cominig week (raster data)    |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| GAP compliance          | B2B dash   | 09df0913-458e-43a0-b6aa-c1b57f295a22 | Rate good agri practices from task completion
+| GAP compliance          | B2B dash   | 09df0913-458e-43a0-b6aa-c1b57f295a22 | Rate good agri practices from task completion                   |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Suitability filter      | B2B dash   | e4b6ec11-4ac3-4cde-82eb-35d6a0e24689 | Rate suitability from raster data and task completion
+| Suitability filter      | B2B dash   | e4b6ec11-4ac3-4cde-82eb-35d6a0e24689 | Rate suitability from raster data and task completion           |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
-| Risk filter             | B2B dash   | 24a96870-8100-4334-9484-f634d6d500c6 | Rate risk from raster data and task completion
+| Risk filter             | B2B dash   | 24a96870-8100-4334-9484-f634d6d500c6 | Rate risk from raster data and task completion                  |
 +-------------------------+------------+--------------------------------------+-----------------------------------------------------------------+
 
 
