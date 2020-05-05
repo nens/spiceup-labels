@@ -1,0 +1,11 @@
+[run]
+source = spiceup_labels
+
+[report]
+show_missing = true
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

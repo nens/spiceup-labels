@@ -1,0 +1,20 @@
+# local python packages
+Fiona-1.8.13-cp37-cp37m-win_amd64.whl
+GDAL-3.0.4-cp37-cp37m-win_amd64.whl
+# python packages from the web :)
+gspread
+numpy
+oauth2client
+pandas
+simplejson
+geopandas
+dask-geomodeling
+
+# Install ourselves (".") in editable ("-e") mode. Include the test ([test])
+# dependencies.
+-e .[test]
+
+# Extra development dependencies
+black
+coveralls
+zest.releaser

@@ -1,0 +1,33 @@
+name: test
+
+# Run on pull requests and on the master branch itself.
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-18.04
+    steps:
+      # Checkout the code.
+      - uses: actions/checkout@v2
+      # Activate python environment
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
+      - name: build
+        run: |
+          python3 -m venv .
+          bin/pip install -r requirements.txt
+      - name: test
+        run: bin/pytest
+      # Reinout: enable this after setting COVERALLS_REPO_TOKEN as a secret.
+      # Note: only if the repo is public. Oh, and use curly braces.
+      # - name: coverage report
+      #   run: bin/coveralls
+      #   env:
+      #     COVERALLS_REPO_TOKEN: $[[ secrets.COVERALLS_REPO_TOKEN ]]
+
+# Possible TODO for Reinout: set up automatic pypi releases for tags.
