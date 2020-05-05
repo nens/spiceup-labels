@@ -3,7 +3,39 @@ spiceup-labels
 
 Introduction
 
-Usage, etc.
+The code configures labeltype models for SpiceUp apps.
+It uses content from the lizard api endpoints api/v4/parcels, api/v4/rasters, api/v3/labeltypes and api/v3/labelparameters.
+We save farm plots as parcels, which have a location and several initial parameters.
+Rasters are used to create location specific advice, e.g. start of dry / rainy season and fertilizer advice maps.
+
+- Crop calendar tasks are generated from one labeltype. It calculates farm specific crop calendar tasks per plot. It uses parcel's location, plant age, local measurements and raster data.
+- Growth and health tasks ..
+- Warning based tasks
+- Weather forecast
+
+-
+
++-------------------------+------------+--------------------------------------+
+| Labeltype (model)       | User       | UUID                                 |
++=========================+============+======================================+
+| App data                | All        | 3ab1addf-00e5-47b0-849e-ba55cd3024b9 |
++-------------------------+------------+--------------------------------------+
+| Crop calendar tasks     | Farmer app | 3d77fb10-1a2c-40ef-8396-f2bc2cd638e1 |
++-------------------------+------------+--------------------------------------+
+| Growth and health tasks | Farmer app | 495706f7-0f59-4eaf-a4d8-bf65946b7c62 |
++-------------------------+------------+--------------------------------------+
+| Warning based tasks     | Farmer app | 025a748d-4507-4b13-98af-ecae696bbeac |
++-------------------------+------------+--------------------------------------+
+| Weather info (home)     | Farmer app | 8ef4c780-6995-4935-8bd3-73440a689fc3 |
++-------------------------+------------+--------------------------------------+
+| Weather info(all)       | Farmer app | a686583a-da6c-40da-a001-32ed7412655b |
++-------------------------+------------+--------------------------------------+
+| GAP compliance          | B2B dash   | 09df0913-458e-43a0-b6aa-c1b57f295a22 |
++-------------------------+------------+--------------------------------------+
+| Suitability filter      | B2B dash   | e4b6ec11-4ac3-4cde-82eb-35d6a0e24689 |
++-------------------------+------------+--------------------------------------+
+| Risk filter             | B2B dash   | 24a96870-8100-4334-9484-f634d6d500c6 |
++-------------------------+------------+--------------------------------------+
 
 
 Installation
