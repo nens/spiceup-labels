@@ -1,5 +1,5 @@
 # python packages from the web :)
-fiona=1.8.13
+fiona==1.8.13
 gdal==3.0.4
 gspread
 numpy
