@@ -2,7 +2,7 @@
 *config.py
 *localsecret.py
 *.geojson
-*.whl
+#*.whl
 client_secret.json
 
 # Pyc/pyo/backup files.

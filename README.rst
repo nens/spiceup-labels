@@ -1,12 +1,12 @@
 spiceup-labels
-==========================================
+========================================== 
 
 Configures labeltype models for SpiceUp apps.
 Labeltypes are used to compute labels for the SpiceUp mobile app (https://spiceup.live/en/app-farmers) and B2B dashboard (https://spiceup.live/en/business).
 It uses content from the lizard api endpoints api/v4/parcels, api/v4/rasters, api/v3/labeltypes and api/v3/labelparameters.
 The SpiceUp app posts farm plots as parcels using the farm's location. The app posts several initial labelparameters to know the conditions in the field.
 While using the app, more labelparameters are posted to learn about task completion and plant health and growth.
-Static and temporal rasters are used to create location specific advice. Inputs are monthly predictions on the start of dry or rainy season, daily weather forecasts and fertilizer nutrient advices for different plant (variety, age, support) and soil (n, p, k) conditions.
+Static and temporal rasters are used to create location specific advice. Inputs are daily soil moisture maps, monthly predictions on the start of dry or rainy season, daily weather forecasts and fertilizer nutrient advices for different plant (variety, age, support) and soil (n, p, k) conditions.
 
 The following table lists the labeltypes, their users, uuid and use case.
 
