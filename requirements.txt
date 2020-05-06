@@ -1,12 +1,10 @@
 # python packages from the web :)
-fiona==1.8.13
-gdal==3.0.4
+geopandas
 gspread
 numpy
 oauth2client
 pandas
 simplejson
-geopandas
 dask-geomodeling
 
 # Install ourselves (".") in editable ("-e") mode. Include the test ([test])

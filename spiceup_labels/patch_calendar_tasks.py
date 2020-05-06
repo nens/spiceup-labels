@@ -763,3 +763,4 @@ def main():  # pragma: no cover
     response = patch_labeltype(dg_source, username, password)
     logger.info("Labeltype update complete. Find response below")
     logger.info(response.json())
+    return response.status_code
