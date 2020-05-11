@@ -58,7 +58,6 @@ labelparams = [
     "labelparam_1",
     "labelparam_2",
 ]  # e.g. ["farm_area", "number_trees"]
-wkt = "POLYGON((1 2, 2 3, 2 3, 1 2))"
 
 # mimic adding fields to parcels locally, replace it later with AddDjangoFields (lizard specific block)
 labelparameters = GeometryFileSource("labelparameters.geojson", id_field="parcel_id")
