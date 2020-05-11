@@ -3,6 +3,7 @@ geopandas
 gspread
 numpy
 oauth2client
+osgeo
 pandas
 simplejson
 dask-geomodeling

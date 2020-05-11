@@ -11,7 +11,7 @@ tests_require = ["pytest", "mock", "pytest-cov", "pytest-flakes", "pytest-black"
 setup(
     name="spiceup-labels",
     version=version,
-    description="calc labels for spiceup app and dashboard from labeltype based on dask-geomodeling and lizard data (rasters, parcels, labelparameters)",
+    description="calculate labels for spiceup apps from labeltypes based on dask-geomodeling and lizard data (rasters, parcels, labelparameters)",
     long_description=long_description,
     # Get strings from http://www.python.org/pypi?%3Aaction=list_classifiers
     classifiers=["Programming Language :: Python", "Framework :: Django"],
