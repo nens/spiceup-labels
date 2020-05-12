@@ -43,8 +43,6 @@ def raster_seriesblocks(dg_rasters, parcels):
     return sb_objects
 
 
-
-
 def get_labeltype_source(result_seriesblock, graph_rasters, labeled_parcels):
     """Serialize result and replace mimic data with Lizard data. 
     Return dg_source, the lizard labeltype config"""

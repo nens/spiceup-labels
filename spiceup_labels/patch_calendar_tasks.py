@@ -31,9 +31,9 @@ from calendar_tasks_config import (
     fertilizer_ids_dict,  # Fertilizer conditions 1-12, based on age, variety and (live) support
 )
 from config_lizard import (
-    mimic_rasters, 
-    raster_seriesblocks, 
-    get_labeltype_source, 
+    mimic_rasters,
+    raster_seriesblocks,
+    get_labeltype_source,
     patch_labeltype,
 )
 
