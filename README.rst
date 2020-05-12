@@ -40,15 +40,15 @@ In SpiceUp we use a model to compute crop calendar tasks. It combines several in
 
 1. Dask-geomodeling code that generates the labeltype model.
 
-.. image:: https://raw.githubusercontent.com/nens/spiceup-labels/blob/calendar_task_dask_geomodeling.PNG?sanitize=true
+.. image:: https://github.com/nens/spiceup-labels/blob/master/calendar_task_dask_geomodeling.PNG?raw=true
 
 2. Compute the crop calendar tasks for one plot, at a particular moment in time (and make available via API)
 
-.. image:: https://raw.githubusercontent.com/nens/spiceup-labels/blob/calendar_task_api.PNG?sanitize=true
+.. image:: https://github.com/nens/spiceup-labels/blob/master/calendar_task_api.PNG?raw=true
 
 3. Disseminate the actual advice through a mobile app (screenshots from beta release)
 
-.. image:: https://raw.githubusercontent.com/nens/spiceup-labels/blob/calendar_task_app.PNG?sanitize=true
+.. image:: https://github.com/nens/spiceup-labels/blob/master/calendar_task_app.PNG?raw=true
 
 
 
