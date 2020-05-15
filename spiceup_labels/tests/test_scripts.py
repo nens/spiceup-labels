@@ -9,6 +9,7 @@ def test_get_parser():
     options = parser.parse_args()
     assert options.verbose == False
 
+
 def test_main():
     r_status_code = patch_calendar_tasks.main()
     assert r_status_code == 200
