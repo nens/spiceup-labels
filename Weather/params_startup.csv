@@ -1,0 +1,6 @@
+code,label,uuid
+precip_amount,Rainfall,5c02ab43-52fa-4a4b-8b4f-fa3739c9af65
+temp,Temperature,1b8c990b-3cf6-4e10-9452-c2d4707cac12
+humidity,Humidity,4a235f56-2ba6-429f-ae4a-3e4c1e48db0a
+windspeed,Windspeed,defaf1e8-183a-4736-b18e-01d42ef88c50
+icon,Weather,d2a6a33f-2b82-4bff-b266-045138e9f01f

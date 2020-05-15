@@ -1,0 +1,40 @@
+{
+	"name": "SpiceUp Weather",
+	"description": "SpiceUp Weather",
+	"organisation": "790bd838241046dd93db1576a1727fde",
+	"object_type": "parcel",
+	"source": {
+		"graph": {
+			"boundaries": [
+				"geoblocks.geometry.sources.GeoDjangoSource",
+				"hydra_core",
+				"parcel",
+				{
+                    "id": "object_id",
+                    "code": "Plot",
+                    "name": "Farm",
+                    "external_id": "Farmer"
+				},
+				"geometry"
+			],
+			"label": [
+				"geoblocks.geometry.field_operations.Classify",
+				"precip_amount_seriesblock",
+				[
+					10000
+				],
+				[
+					"extra",
+					"Future Weather suitability indicator"
+				]
+			],
+			"result": [
+				"geoblocks.geometry.base.SetSeriesBlock",
+				"boundaries",
+				"label_value",
+				"label"
+			]
+		},
+		"name": "result"
+	}
+}
