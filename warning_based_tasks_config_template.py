@@ -38,8 +38,10 @@ for i in range(len(warning_tasks.columns)):
 # Make warning_tasks columns numeric where possible
 cols = warning_tasks.columns  # .drop('id')
 warning_tasks[cols] = warning_tasks[cols].apply(pd.to_numeric, errors="ignore")
-warning_tasks = warning_tasks.replace(np.nan, '', regex=True) # remove NaN 
-warning_tasks = warning_tasks[warning_tasks["task_id"]!='WiP'] # drop work in progress
+warning_tasks = warning_tasks.replace(np.nan, "", regex=True)  # remove NaN
+warning_tasks = warning_tasks[
+    warning_tasks["task_id"] != "WiP"
+]  # drop work in progress
 
 # Load rasters for warning based tasks
 lizard_rasters = {
@@ -59,7 +61,7 @@ general_labelparams = [
     "labelparam_2",
 ]  # e.g. ["farm_area", "number_trees"]
 
-warning_labelparams = sorted(list(set(warning_tasks['labelparameter'].to_list())))
+warning_labelparams = sorted(list(set(warning_tasks["labelparameter"].to_list())))
 labelparams = general_labelparams + warning_labelparams
 
 lp_seriesblocks = {}
@@ -88,11 +90,13 @@ for lp in labelparams:
     if lp == labelparams[-1]:
         key = "parcels_labeled"
     else:
-        key = f"parcels_add_{lp}"    
+        key = f"parcels_add_{lp}"
     if lp in general_labelparams:
         param_labeltype_uuid = "3ab1addf-00e5-47b0-849e-ba55cd3024b9"
-    else: # labelparam is in warning_labelparams
-        param_labeltype_uuid = labeltype_uuid # i.e. "025a748d-4507-4b13-98af-ecae696bbeac"
+    else:  # labelparam is in warning_labelparams
+        param_labeltype_uuid = (
+            labeltype_uuid  # i.e. "025a748d-4507-4b13-98af-ecae696bbeac"
+        )
     labeled_parcels[key] = [
         "geoblocks.geometry.sources.AddDjangoFields",
         add_to,
