@@ -30,7 +30,7 @@ from calendar_tasks_config import (
     lp_seriesblocks,  # seriesblocks of labelparams per parcel
     fertilizer_ids_dict,  # Fertilizer conditions 1-12, based on age, variety and (live) support
 )
-from config_lizard import (
+from spiceup_labels.config_lizard import (
     mimic_rasters,
     raster_seriesblocks,
     get_labeltype_source,
@@ -391,8 +391,11 @@ def task_contents(task_dfs, t_identifiers):
     return tasks_data
 
 
-def next_task_contens(tasks_data, calendar_tasks_next, id_plant_age):
+def next_task_contents(tasks_data, calendar_tasks_next, id_plant_age):
     """add next task once (it is already concatenated)"""
+    calendar_tasks_next.id_days_start = calendar_tasks_next.id_days_start.astype(
+        "int32"
+    )
     bins_start_ids_next_task = calendar_tasks_next.id_days_start.to_list()
     start_ids_next_task = deepcopy(bins_start_ids_next_task)
     bins_start_ids_next_task.insert(0, bins_start_ids_next_task[0] - 30)
@@ -401,6 +404,7 @@ def next_task_contens(tasks_data, calendar_tasks_next, id_plant_age):
     )
     next_task_match = (id_plant_age - start_id_next_task_classified) < 1
     start_id_next_task_validated = start_id_next_task_classified * next_task_match
+    tasks_data["next_id"] = start_id_next_task_validated
     for col in list(calendar_tasks_next.columns)[:2]:
         calendar_tasks_next[col] = (
             calendar_tasks_next["id_days_start"].astype(str)
@@ -566,7 +570,7 @@ def main():  # pragma: no cover
     task_dfs = tasks_t1_t2_t3(calendar_tasks_labels)
     tasks_data_tasks = task_contents(task_dfs, t_identifiers)
     logging.info("calculate next taks content too")
-    tasks_data = next_task_contens(tasks_data_tasks, calendar_tasks_next, id_plant_age)
+    tasks_data = next_task_contents(tasks_data_tasks, calendar_tasks_next, id_plant_age)
     globals().update(tasks_data)
     logging.info("calculate nutrient advices in the form of n, p and k grams per tree")
     n_advice, p_advice, k_advice = fertilizer_conditions(
@@ -651,6 +655,8 @@ def main():  # pragma: no cover
         p_advice,
         "_XK_",
         k_advice,
+        "next_task_id",
+        next_id,
         "next_task",
         next_task,
         "next_task_IND",
@@ -660,11 +666,9 @@ def main():  # pragma: no cover
     )
 
     logging.info("serialize model and replace local data with lizard data")
-    dg_source = create_lizard_labeltype(
-        result_seriesblock, graph_rasters, labeled_parcels
-    )
+    dg_source = get_labeltype_source(result_seriesblock, graph_rasters, labeled_parcels)
     logging.info("update the labeltype model")
-    response = patch_labeltype(dg_source, username, password)
+    response = patch_labeltype(dg_source, username, password, labeltype_uuid)
     logger.info("Labeltype update complete. Find response below")
-    logger.info(response.json())
+    logger.info(response.status_code)
     return response.status_code
