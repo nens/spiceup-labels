@@ -1,0 +1,202 @@
+{
+    "name": "SpiceUp Weather",
+    "description": "SpiceUp Weather",
+    "organisation": "790bd838241046dd93db1576a1727fde",
+    "object_type": "parcel",
+    "source": {
+        "graph": {
+            "parcels": [
+                "geoblocks.geometry.sources.GeoDjangoSource",
+                "hydra_core",
+                "parcel",
+                {
+                    "id": "object_id",
+                    "code": "Plot",
+                    "name": "Farm",
+                    "external_id": "Farmer"
+                },
+                "geometry"
+            ],
+            "label": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "parcels",
+                "object_id"
+            ],
+            "result": [
+                "geoblocks.geometry.base.SetSeriesBlock",
+                "parcels",
+                "label_value",
+                "label",
+                "weather_summary_t0",
+                "weather_summary_seriesblock",
+                "temperature_t0",
+                "temperature_seriesblock",
+                "humidity_t0",
+                "humidity_seriesblock",
+                "rainfall_t0",
+                "rainfall_seriesblock",
+                "rainfall_min_t0",
+                "rainfall_min_seriesblock",
+                "rainfall_max_t0",
+                "rainfall_max_seriesblock",
+                "sunlight_t0",
+                "sunlight_seriesblock",
+                "soil_temperature_t0",
+                "soil_temperature_seriesblock"
+            ],
+            "weather_summary": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "d2a6a33f-2b82-4bff-b266-045138e9f01f"
+            ],
+            "weather_summary_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "weather_summary",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "weather_summary_label"
+            ],
+            "weather_summary_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "weather_summary_aggregate",
+                "weather_summary_label"
+            ],
+            "temperature": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "1b8c990b-3cf6-4e10-9452-c2d4707cac12"
+            ],
+            "temperature_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "temperature",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "temperature_label"
+            ],
+            "temperature_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "temperature_aggregate",
+                "temperature_label"
+            ],
+            "humidity": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "4a235f56-2ba6-429f-ae4a-3e4c1e48db0a"
+            ],
+            "humidity_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "humidity",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "humidity_label"
+            ],
+            "humidity_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "humidity_aggregate",
+                "humidity_label"
+            ],
+            "rainfall": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "5c02ab43-52fa-4a4b-8b4f-fa3739c9af65"
+            ],
+            "rainfall_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "rainfall",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "rainfall_label"
+            ],
+            "rainfall_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "rainfall_aggregate",
+                "rainfall_label"
+            ],
+            "rainfall_min": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "80e144c7-2c17-4280-aa04-1f4117522686"
+            ],
+            "rainfall_min_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "rainfall_min",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "rainfall_min_label"
+            ],
+            "rainfall_min_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "rainfall_min_aggregate",
+                "rainfall_min_label"
+            ],
+            "rainfall_max": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "29e148d8-75f2-4ab8-bb06-49aaeeedf50a"
+            ],
+            "rainfall_max_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "rainfall_max",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "rainfall_max_label"
+            ],
+            "rainfall_max_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "rainfall_max_aggregate",
+                "rainfall_max_label"
+            ],
+            "sunlight": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "420941d1-3851-40d5-895b-e9574870c157"
+            ],
+            "sunlight_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "sunlight",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "sunlight_label"
+            ],
+            "sunlight_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "sunlight_aggregate",
+                "sunlight_label"
+            ],
+            "soil_temperature": [
+                "lizard_nxt.blocks.LizardRasterSource",
+                "e5f19acf-9c24-4938-8181-30b26d6a619b"
+            ],
+            "soil_temperature_aggregate": [
+                "geoblocks.geometry.aggregate.AggregateRaster",
+                "parcels",
+                "soil_temperature",
+                "mean",
+                "epsg:4326",
+                0.00001,
+                null,
+                "soil_temperature_label"
+            ],
+            "soil_temperature_seriesblock": [
+                "geoblocks.geometry.base.GetSeriesBlock",
+                "soil_temperature_aggregate",
+                "soil_temperature_label"
+            ]
+        },
+        "name": "result"
+    }
+}
