@@ -3,7 +3,8 @@
 *localsecret.py
 *.geojson
 *.whl
-client_secret.json
+*.json
+*.xlsx
 
 # Pyc/pyo/backup files.
 *.py[co]
@@ -23,6 +24,7 @@ node_modules/
 doc/build/
 ansible/*.retry
 .venv
+venv/
 bin/
 lib/
 pyvenv.cfg

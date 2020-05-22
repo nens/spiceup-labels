@@ -28,7 +28,8 @@ setup(
     extras_require={"test": tests_require},
     entry_points={
         "console_scripts": [
-            "run-spiceup-labels = spiceup_labels.patch_calendar_tasks:main"
+            "run-spiceup-labels = spiceup_labels.patch_calendar_tasks:main",
+            "run-spiceup-labels = spiceup_labels.patch_warning_based_tasks:main",
         ]
     },
 )
