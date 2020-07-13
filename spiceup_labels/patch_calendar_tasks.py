@@ -6,27 +6,20 @@ We save farm plots as parcels, which have a location and several initial paramet
 """
 
 import argparse
-import json
 import logging
 import numpy as np
-import pandas as pd
-import requests
-import simplejson
 from copy import deepcopy
-import dask_geomodeling as dg
 from dask_geomodeling.raster import *
 from dask_geomodeling.geometry import *
-from dask_geomodeling.geometry.aggregate import AggregateRaster
-from dask_geomodeling.geometry.base import GetSeriesBlock, SetSeriesBlock
+from dask_geomodeling.geometry.base import SetSeriesBlock
 from localsecret import username, password
 from calendar_tasks_config import (
     labeltype_uuid,  # the uuid of the model
     calendar_tasks,  # crop calendar tasks as specified in  online spreadsheet "Items & Properties on the App Ui/x"
-    lizard_rasters,  # Raster data: season onset data, fertilizer recommendations. dict with names and uuids of the rasters used
+    lizard_rasters,  # Raster data: season onset, fertilizer advice. dict with names and uuids of the rasters used
     parcels,  # Load parcels locally. Mimic Lizard data
     parcels_labeled,  # parcels with labels locally
     labeled_parcels,  # parcels with labels in lizard
-    labelparams,  # List with farm input data: age, location, variety, live support
     lp_seriesblocks,  # seriesblocks of labelparams per parcel
     fertilizer_ids_dict,  # Fertilizer conditions 1-12, based on age, variety and (live) support
 )
@@ -83,7 +76,7 @@ def months_n_days(calendar_tasks):
     calendar_tasks_monthly = calendar_tasks.drop_duplicates(subset=["month"])
     months = list(calendar_tasks_monthly.month)
     months.append(months[-1] + 1)
-    days_months = [round(month * 365.25 / 12) for month in months]
+    days_months = [round(month * 365.25 / 12 + 0.01) for month in months]
     days_months_1521 = deepcopy(days_months)
     days_months_1521.append(days_months[-1] + 30)
 
@@ -126,13 +119,18 @@ def actual_plant_age(
     calendar_tasks_plant_year__01_1__123_2__345_3_sb = Classify(
         plant_age_sb, [365, 1095], [1, 2, 3], False
     )
+    # calendar_tasks_plant_day_min_sb = Classify(
+    #     calendar_tasks_plant_month_sb,
+    #     calendar_tasks_plant_months[1:],
+    #     days_months,
+    #     False,
+    # )
     calendar_tasks_plant_day_min_sb = Classify(
         calendar_tasks_plant_month_sb,
-        calendar_tasks_plant_months[1:],
-        days_months,
+        calendar_tasks_plant_months,
+        days_months[:-1],
         False,
     )
-
     shift_days = round((365.25 / 12) * 6 + 1)  # 184
     id_plant_age = plant_age_sb + shift_days
     id_calendar_tasks_plant_day_min_sb = calendar_tasks_plant_day_min_sb + shift_days
@@ -369,9 +367,9 @@ def tasks_t1_t2_t3(calendar_tasks_labels):
 
 
 def task_contents(task_dfs, t_identifiers):
-    # Reclass task IDs to task contents
-    # loop through task dataframes
-    # Match possible tasks with identfied task from farm conditions
+    """Reclassify task IDs to task contents, loop through task dataframes &
+    Match possible tasks with identified task from farm conditions
+    """
     tasks_data = {}
     for n, (df, t_identifier) in enumerate(zip(task_dfs, t_identifiers), 1):
         t_ids = df.task_id.to_list()
@@ -382,6 +380,7 @@ def task_contents(task_dfs, t_identifiers):
         t_id_match = t_diff < 100
         t_identifier_validated = t_id_classified * t_id_match
         tasks_data[f"t{n}_id_validated"] = t_identifier_validated
+
         for col in list(df.columns)[1:-9]:
             df[col] = df["task_id"].astype(str) + "_" + df[col].astype(str)
             t_col_list = df[col].to_list()
@@ -398,7 +397,7 @@ def next_task_contents(tasks_data, calendar_tasks_next, id_plant_age):
     )
     bins_start_ids_next_task = calendar_tasks_next.id_days_start.to_list()
     start_ids_next_task = deepcopy(bins_start_ids_next_task)
-    bins_start_ids_next_task.insert(0, bins_start_ids_next_task[0] - 30)
+    bins_start_ids_next_task.insert(0, 0)
     start_id_next_task_classified = Classify(
         id_plant_age, bins_start_ids_next_task, start_ids_next_task
     )
@@ -458,7 +457,7 @@ def fertilizer_conditions(
 
     # Calculate N P K advice
     fertilizer_task_id = Round(
-        Classify(identified_task_1, f_bins, f_class_values, False)
+        Classify(identified_task_1, f_bins, f_class_values, True)
     )
     n_advice = 0
     p_advice = 0
@@ -569,12 +568,12 @@ def main():  # pragma: no cover
     logging.info("get task content from calendar tasks df, aka tabel suci")
     task_dfs = tasks_t1_t2_t3(calendar_tasks_labels)
     tasks_data_tasks = task_contents(task_dfs, t_identifiers)
-    logging.info("calculate next taks content too")
+    logging.info("calculate next tasks content too")
     tasks_data = next_task_contents(tasks_data_tasks, calendar_tasks_next, id_plant_age)
     globals().update(tasks_data)
     logging.info("calculate nutrient advices in the form of n, p and k grams per tree")
     n_advice, p_advice, k_advice = fertilizer_conditions(
-        fertilizer_ids_dict, calendar_tasks_labels, t_identifiers[0]
+        fertilizer_ids_dict, calendar_tasks_labels, t1_id_validated
     )
     logging.info("Set result table with parcels, labelparameters and additional labels")
     result_seriesblock = SetSeriesBlock(

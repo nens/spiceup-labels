@@ -36,6 +36,8 @@ The following table lists the labeltypes, their users, uuid and use case.
 Example
 ------------
 
+.. image:: https://github.com/nens/spiceup-labels/blob/master/calendar_task_app.PNG?raw=true
+
 In SpiceUp we use a model to compute crop calendar tasks. It combines several inputs such as plant age, plant variety and time and location specific raster data. It is used to compute tasks for the SpiceUp mobile app as follows.
 
 1. Dask-geomodeling code that generates the labeltype model.
@@ -47,8 +49,6 @@ In SpiceUp we use a model to compute crop calendar tasks. It combines several in
 .. image:: https://github.com/nens/spiceup-labels/blob/master/calendar_task_api.PNG?raw=true
 
 3. Disseminate the actual advice through a mobile app (screenshots from beta release)
-
-.. image:: https://github.com/nens/spiceup-labels/blob/master/calendar_task_app.PNG?raw=true
 
 
 

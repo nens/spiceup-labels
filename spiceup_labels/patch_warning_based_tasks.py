@@ -44,7 +44,7 @@ from spiceup_labels.config_lizard import (
 def get_tasks_seriesblock(warning_tasks):
     # raster manipulations (TODO create LizardRasterSource when decent alternative for below is available)
     soil_moisture_wet = misc.Reclassify(
-        soil_moisture_p90_dry_1_optimal_3_wet_5, [[5, 1]], True
+        irrigate_01_warning, [[5, 1]], True
     )
     shade_warning = soil_moisture_wet * 1  # TODO improve
     pests_warning = misc.Mask(soil_moisture_wet, 0)  #  * 1 # TODO improve
