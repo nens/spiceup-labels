@@ -28,7 +28,7 @@ setup(
     extras_require={"test": tests_require},
     entry_points={
         "console_scripts": [
-            "run-spiceup-labels = spiceup_labels.patch_growth_health_labeltype:main",
+            "run-spiceup-labels = spiceup_labels.patch_calendar_tasks:main",
             "run-spiceup-labels-calendar = spiceup_labels.patch_calendar_tasks:main",
             "run-spiceup-labels-growth-health = spiceup_labels.patch_growth_health_labeltype:main",
             "run-spiceup-labels-warning = spiceup_labels.patch_warning_based_tasks:main",

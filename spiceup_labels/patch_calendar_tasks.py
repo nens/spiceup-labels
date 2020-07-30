@@ -649,11 +649,11 @@ def main():  # pragma: no cover
         "t3_input",
         0,  # optional TODO, insert logic for other input
         "_XN_",
-        n_advice,
+        n_advice * 0.25,  # Give quarterly instead of yearly advice
         "_XP_",
-        p_advice,
+        p_advice * 0.25,  # Give quarterly instead of yearly advice
         "_XK_",
-        k_advice,
+        k_advice * 0.25,  # Give quarterly instead of yearly advice
         "next_task_id",
         next_id,
         "next_task",
