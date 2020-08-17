@@ -468,9 +468,9 @@ def fertilizer_conditions(
         n_advice = eval(n) * fertilizer_task_valid + n_advice
         p_advice = eval(p) * fertilizer_task_valid + p_advice
         k_advice = eval(k) * fertilizer_task_valid + k_advice
-    n_advice = Round(n_advice * 0.2) * 5  # round by 5 grams as adviced by IPB
-    p_advice = Round(p_advice * 0.2) * 5
-    k_advice = Round(k_advice * 0.2) * 5
+    n_advice = Round(n_advice * 0.25 * 0.2) * 5  # Give quarterly instead of yearly advice (0.25)
+    p_advice = Round(p_advice * 0.25 * 0.2) * 5  # & round by 5 grams as advised by IPB (0.2 & 5)
+    k_advice = Round(k_advice * 0.25 * 0.2) * 5
     return n_advice, p_advice, k_advice
 
 
@@ -649,11 +649,11 @@ def main():  # pragma: no cover
         "t3_input",
         0,  # optional TODO, insert logic for other input
         "_XN_",
-        n_advice * 0.25,  # Give quarterly instead of yearly advice
+        n_advice,
         "_XP_",
-        p_advice * 0.25,  # Give quarterly instead of yearly advice
+        p_advice,
         "_XK_",
-        k_advice * 0.25,  # Give quarterly instead of yearly advice
+        k_advice,
         "next_task_id",
         next_id,
         "next_task",
