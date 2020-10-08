@@ -377,8 +377,10 @@ def task_contents(task_dfs, t_identifiers):
         t_ids.append(t_ids[-1] + 100)
         t_id_classified = Classify(t_identifier, t_ids, t_valid, False)
         t_diff = Subtract(t_identifier, t_id_classified)
-        t_id_match = t_diff < 100
+        t_id_match = t_diff < 200
         t_identifier_validated = t_id_classified * t_id_match
+        tasks_data[f"t{n}_id_classified"] = t_id_classified
+        tasks_data[f"t{n}_diff"] = t_diff
         tasks_data[f"t{n}_id_validated"] = t_identifier_validated
 
         for col in list(df.columns)[1:-9]:
@@ -428,7 +430,6 @@ def fertilizer_conditions(
     fertilizer_df = calendar_tasks_labels[["task_id", "fertilizer_data_id"]]
     fertilizer_df = fertilizer_df.sort_values(by=["task_id"])  # sort by task_id
     fertilizer_tasks = fertilizer_df.values.tolist()
-
     f_bins, f_class_values = [0], []
     n = 0
     just_binned = False
@@ -568,6 +569,7 @@ def main():  # pragma: no cover
     logging.info("get task content from calendar tasks df, aka tabel suci")
     task_dfs = tasks_t1_t2_t3(calendar_tasks_labels)
     tasks_data_tasks = task_contents(task_dfs, t_identifiers)
+    # logging.info(tasks_data_tasks)
     logging.info("calculate next tasks content too")
     tasks_data = next_task_contents(tasks_data_tasks, calendar_tasks_next, id_plant_age)
     globals().update(tasks_data)
