@@ -464,11 +464,12 @@ def fertilizer_conditions(
     p_advice = 0
     k_advice = 0
     for c, npk in fertilizer_ids_dict.items():
-        fertilizer_task_valid = fertilizer_task_id == c
-        n, p, k = npk
-        n_advice = eval(n) * fertilizer_task_valid + n_advice
-        p_advice = eval(p) * fertilizer_task_valid + p_advice
-        k_advice = eval(k) * fertilizer_task_valid + k_advice
+        fertilizer_task_valid = fertilizer_task_id <= c
+        if n_advice == 0:
+            n, p, k = npk
+            n_advice = eval(n) * fertilizer_task_valid + n_advice
+            p_advice = eval(p) * fertilizer_task_valid + p_advice
+            k_advice = eval(k) * fertilizer_task_valid + k_advice
     n_advice = Round(n_advice * 0.25 * 0.2) * 5  # Give quarterly instead of yearly advice (0.25)
     p_advice = Round(p_advice * 0.25 * 0.2) * 5  # & round by 5 grams as advised by IPB (0.2 & 5)
     k_advice = Round(k_advice * 0.25 * 0.2) * 5
