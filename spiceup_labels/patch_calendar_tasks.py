@@ -119,6 +119,10 @@ def actual_plant_age(
     calendar_tasks_plant_year__01_1__123_2__345_3_sb = Classify(
         plant_age_sb, [365, 1095], [1, 2, 3], False
     )
+    age_01 = calendar_tasks_plant_year__01_1__123_2__345_3_sb == 1
+    age_13 = calendar_tasks_plant_year__01_1__123_2__345_3_sb == 2
+    age_3p = calendar_tasks_plant_year__01_1__123_2__345_3_sb == 3
+
     # calendar_tasks_plant_day_min_sb = Classify(
     #     calendar_tasks_plant_month_sb,
     #     calendar_tasks_plant_months[1:],
@@ -150,6 +154,7 @@ def actual_plant_age(
         id_plant_age,
         days_until_next_task,
         days_x_1000,
+        age_01, age_13, age_3p
     )
 
 
@@ -421,55 +426,37 @@ def next_task_contents(tasks_data, calendar_tasks_next, id_plant_age):
 
 # ----------------------------------------------------------
 def fertilizer_conditions(
-    fertilizer_ids_dict, calendar_tasks_labels, identified_task_1
+    fertilizer_ids_dict, live_support_sb, pepper_variety_sb, age_01, age_13, age_3p
 ):
     """Fertilizer conditions binned. Check per NPK advice if it is valid (task fertilizer class Equal class).
     and sum the advices (if not valid, they become 0 and will be omitted)
     classes are 1-12, based on age, variety and (live) support"""
-
-    fertilizer_df = calendar_tasks_labels[["task_id", "fertilizer_data_id"]]
-    fertilizer_df = fertilizer_df.sort_values(by=["task_id"])  # sort by task_id
-    fertilizer_tasks = fertilizer_df.values.tolist()
-    f_bins, f_class_values = [0], []
-    n = 0
-    just_binned = False
-    prev_task_id = 1
-    # Defaults to True (the right side of the bin is closed so a value
-    # is assigned to the bin on the left if it is exactly on a bin edge).
-    for task_id, fertilizer_id in fertilizer_tasks:
-        n += 0.0001
-        if fertilizer_id > 0:
-            if not just_binned:
-                f_bins.append(prev_task_id)
-                f_class_values.append(n)
-                just_binned = True
-                f_bins.append(task_id)
-                f_class_values.append(fertilizer_id + n)
-            else:
-                f_bins.append(task_id)
-                f_class_values.append(fertilizer_id + n)
-                just_binned = True
-        else:
-            if just_binned:
-                f_bins.append(task_id)
-                f_class_values.append(n)
-                just_binned = False
-        prev_task_id = task_id
-
-    # Calculate N P K advice
-    fertilizer_task_id = Round(
-        Classify(identified_task_1, f_bins, f_class_values, True)
-    )
+    live_support_1 = live_support_sb == 1
+    live_support_2 = live_support_sb == 2
+    pepper_variety_1 = pepper_variety_sb == 1
+    pepper_variety_2 = pepper_variety_sb == 2
+    f1 = age_01 * live_support_1 * pepper_variety_1 * 1
+    f2 = age_13 * live_support_1 * pepper_variety_1 * 2
+    f3 = age_3p * live_support_1 * pepper_variety_1 * 3
+    f4 = age_01 * live_support_2 * pepper_variety_1 * 4
+    f5 = age_13 * live_support_2 * pepper_variety_1 * 5
+    f6 = age_3p * live_support_2 * pepper_variety_1 * 6
+    f7 = age_01 * live_support_1 * pepper_variety_2 * 7
+    f8 = age_13 * live_support_1 * pepper_variety_2 * 8
+    f9 = age_3p * live_support_1 * pepper_variety_2 * 9
+    f10 = age_01 * live_support_2 * pepper_variety_2 * 10
+    f11 = age_13 * live_support_2 * pepper_variety_2 * 11
+    f12 = age_3p * live_support_2 * pepper_variety_2 * 12
+    f_number = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12
     n_advice = 0
     p_advice = 0
     k_advice = 0
     for c, npk in fertilizer_ids_dict.items():
-        fertilizer_task_valid = fertilizer_task_id <= c
-        if n_advice == 0:
-            n, p, k = npk
-            n_advice = eval(n) * fertilizer_task_valid + n_advice
-            p_advice = eval(p) * fertilizer_task_valid + p_advice
-            k_advice = eval(k) * fertilizer_task_valid + k_advice
+        fertilizer_task_valid = f_number == c
+        n, p, k = npk
+        n_advice = eval(n) * fertilizer_task_valid + n_advice
+        p_advice = eval(p) * fertilizer_task_valid + p_advice
+        k_advice = eval(k) * fertilizer_task_valid + k_advice
     n_advice = Round(n_advice * 0.25 * 0.2) * 5  # Give quarterly instead of yearly advice (0.25)
     p_advice = Round(p_advice * 0.25 * 0.2) * 5  # & round by 5 grams as advised by IPB (0.2 & 5)
     k_advice = Round(k_advice * 0.25 * 0.2) * 5
@@ -544,6 +531,7 @@ def main():  # pragma: no cover
         id_plant_age,
         days_until_next_task,
         days_x_1000,
+        age_01, age_13, age_3p
     ) = actual_ages
     conditions_season = season_conditions(
         days_until_jan_1_sb,
@@ -566,6 +554,10 @@ def main():  # pragma: no cover
         season_below_0_ideal_100_above_200,
         days_x_1000,
     ]
+
+
+
+
     t_identifiers = get_task_ids(task_id_parts)
     logging.info("get task content from calendar tasks df, aka tabel suci")
     task_dfs = tasks_t1_t2_t3(calendar_tasks_labels)
@@ -575,9 +567,8 @@ def main():  # pragma: no cover
     tasks_data = next_task_contents(tasks_data_tasks, calendar_tasks_next, id_plant_age)
     globals().update(tasks_data)
     logging.info("calculate nutrient advices in the form of n, p and k grams per tree")
-    n_advice, p_advice, k_advice = fertilizer_conditions(
-        fertilizer_ids_dict, calendar_tasks_labels, t1_id_validated
-    )
+    n_advice, p_advice, k_advice = fertilizer_conditions(fertilizer_ids_dict, live_support_sb, pepper_variety_sb,
+                                            age_01, age_13, age_3p)
     logging.info("Set result table with parcels, labelparameters and additional labels")
     result_seriesblock = SetSeriesBlock(
         parcels_labeled,
