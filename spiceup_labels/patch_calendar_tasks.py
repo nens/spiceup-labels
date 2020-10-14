@@ -425,7 +425,55 @@ def next_task_contents(tasks_data, calendar_tasks_next, id_plant_age):
 
 
 # ----------------------------------------------------------
-def fertilizer_conditions(
+def fertilizer_condition(
+    fertilizer_ids, calendar_tasks_labels, identified_task_1
+):
+    """Fertilizer conditions binned. Check per NPK advice if it is valid (task fertilizer class Equal class).
+    and sum the advices (if not valid, they become 0 and will be omitted)
+    classes are 1-12, based on age, variety and (live) support"""
+
+    fertilizer_df = calendar_tasks_labels[["task_id", "fertilizer_data_id"]]
+    fertilizer_df = fertilizer_df.sort_values(by=["task_id"])  # sort by task_id
+    fertilizer_tasks = fertilizer_df.values.tolist()
+    f_bins, f_class_values = [0], []
+    n = 0
+    just_binned = False
+    prev_task_id = 1
+    # Defaults to True (the right side of the bin is closed so a value
+    # is assigned to the bin on the left if it is exactly on a bin edge).
+    for task_id, fertilizer_id in fertilizer_tasks:
+        n += 0.0001
+        if fertilizer_id > 0:
+            if not just_binned:
+                f_bins.append(prev_task_id)
+                f_class_values.append(n)
+                just_binned = True
+                f_bins.append(task_id)
+                f_class_values.append(fertilizer_id + n)
+            else:
+                f_bins.append(task_id)
+                f_class_values.append(fertilizer_id + n)
+                just_binned = True
+        else:
+            if just_binned:
+                f_bins.append(task_id)
+                f_class_values.append(n)
+                just_binned = False
+        prev_task_id = task_id
+
+    # Calculate N P K advice
+    fertilizer_task_id = Round(
+        Classify(identified_task_1, f_bins, f_class_values, True)
+    )
+    n_advice = 0
+    for c, npk in fertilizer_ids.items():
+        fertilizer_task_valid = fertilizer_task_id == c
+        n, p, k = npk
+        n_advice = eval(n) * fertilizer_task_valid + n_advice
+    return (n_advice > 0) * 1
+
+
+def fertilizer_conditions_always(
     fertilizer_ids_dict, live_support_sb, pepper_variety_sb, age_01, age_13, age_3p
 ):
     """Fertilizer conditions binned. Check per NPK advice if it is valid (task fertilizer class Equal class).
@@ -474,11 +522,6 @@ def get_parser():
         default=False,
         help="Verbose output",
     )
-    # add arguments here
-    # parser.add_argument(
-    #     'path',
-    #     metavar='FILE',
-    # )
     return parser
 
 
@@ -555,9 +598,6 @@ def main():  # pragma: no cover
         days_x_1000,
     ]
 
-
-
-
     t_identifiers = get_task_ids(task_id_parts)
     logging.info("get task content from calendar tasks df, aka tabel suci")
     task_dfs = tasks_t1_t2_t3(calendar_tasks_labels)
@@ -567,8 +607,11 @@ def main():  # pragma: no cover
     tasks_data = next_task_contents(tasks_data_tasks, calendar_tasks_next, id_plant_age)
     globals().update(tasks_data)
     logging.info("calculate nutrient advices in the form of n, p and k grams per tree")
-    n_advice, p_advice, k_advice = fertilizer_conditions(fertilizer_ids_dict, live_support_sb, pepper_variety_sb,
-                                            age_01, age_13, age_3p)
+    tx_input_0_or_1 = fertilizer_condition(
+        fertilizer_ids_dict, calendar_tasks_labels, t1_id_validated
+    )
+    n_advice, p_advice, k_advice = fertilizer_conditions_always(fertilizer_ids_dict, live_support_sb,
+                                                                pepper_variety_sb, age_01, age_13, age_3p)
     logging.info("Set result table with parcels, labelparameters and additional labels")
     result_seriesblock = SetSeriesBlock(
         parcels_labeled,
@@ -597,7 +640,7 @@ def main():  # pragma: no cover
         "t1_image_url",
         task_1_image_url,
         "t1_input",
-        (n_advice > 0) * 1,  # fertilizer advice yes 1 or no 0
+        tx_input_0_or_1 * 1,  # fertilizer advice yes 1 or no 0
         "t2_task_id",
         t2_id_validated,
         "t2_task",
@@ -619,7 +662,7 @@ def main():  # pragma: no cover
         "t2_image_url",
         task_2_image_url,
         "t2_input",
-        (n_advice > 0) * 2,  # TODO insert logic for manure input
+        tx_input_0_or_1 * 2,  # TODO insert logic for manure input
         "t3_task_id",
         t3_id_validated,
         "t3_task",
