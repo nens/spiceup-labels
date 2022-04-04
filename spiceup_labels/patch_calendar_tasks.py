@@ -347,7 +347,7 @@ def get_task_ids(task_id_parts):
 
 
 def tasks_t1_t2_t3(calendar_tasks_labels):
-    """create separate dataframes for tasks that occur on the same date. 
+    """create separate dataframes for tasks that occur on the same date.
     Each dataframe has a maximum of 1 task per date"""
     t1 = calendar_tasks_labels[
         calendar_tasks_labels.task_id < 2 * 10 ** 7
@@ -482,13 +482,21 @@ def fertilizer_conditions_always(
     classes are 1-12, based on age, variety and (live) support"""
     live_support_1 = live_support_sb == 1
     live_support_2 = live_support_sb == 2
-    f1 = age_01 * live_support_1 * 1
-    f2 = age_13 * live_support_1 * 2
-    f3 = age_3p * live_support_1 * 3
-    f4 = age_01 * live_support_2 * 4
-    f5 = age_13 * live_support_2 * 5
-    f6 = age_3p * live_support_2 * 6
-    f_number = f1 + f2 + f3 + f4 + f5 + f6
+    pepper_variety_1 = pepper_variety_sb == 1
+    pepper_variety_2 = pepper_variety_sb == 2
+    f1 = age_01 * live_support_1 * pepper_variety_1 * 1
+    f2 = age_13 * live_support_1 * pepper_variety_1 * 2
+    f3 = age_3p * live_support_1 * pepper_variety_1 * 3
+    f4 = age_01 * live_support_2 * pepper_variety_1 * 4
+    f5 = age_13 * live_support_2 * pepper_variety_1 * 5
+    f6 = age_3p * live_support_2 * pepper_variety_1 * 6
+    f7 = age_01 * live_support_1 * pepper_variety_2 * 7
+    f8 = age_13 * live_support_1 * pepper_variety_2 * 8
+    f9 = age_3p * live_support_1 * pepper_variety_2 * 9
+    f10 = age_01 * live_support_2 * pepper_variety_2 * 10
+    f11 = age_13 * live_support_2 * pepper_variety_2 * 11
+    f12 = age_3p * live_support_2 * pepper_variety_2 * 12
+    f_number = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12
     n_advice = 0
     p_advice = 0
     k_advice = 0
