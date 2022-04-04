@@ -32,6 +32,9 @@ setup(
             "run-spiceup-labels-calendar = spiceup_labels.patch_calendar_tasks:main",
             "run-spiceup-labels-growth-health = spiceup_labels.patch_growth_health_labeltype:main",
             "run-spiceup-labels-warning = spiceup_labels.patch_warning_based_tasks:main",
+            "run-spiceup-labels-weather = spiceup_labels.patch_weather_labeltype:main",
+            "run-spiceup-labels-startup = spiceup_labels.patch_weather_startup_labeltype:main",
+            "run-spiceup-labels-pd = spiceup_labels.patch_pd_risk_labeltype:main"
         ]
     },
 )

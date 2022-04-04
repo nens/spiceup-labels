@@ -5,6 +5,7 @@ Created on Tue Feb 25 10:28:36 2020
 """
 
 import numpy as np
+import json
 import argparse
 import logging
 from localsecret import username, password
@@ -21,9 +22,7 @@ from growth_health_tasks_config import (
     health_codes,
 )
 
-from spiceup_labels.config_lizard import (
-    patch_labeltype,
-)
+from spiceup_labels.config_lizard import patch_labeltype
 
 
 def get_parser():
@@ -57,7 +56,6 @@ def main():  # pragma: no cover
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
     logging.info("load and reclass growth_health_tasks")
 
-
     source = data["source"]
     graph = source["graph"]
 
@@ -78,20 +76,20 @@ def main():  # pragma: no cover
     for lp in labelparams:
         labelparam_counter += 1
         if lp == labelparams[-1]:
-            key = "parcels_all_labelparams"
+            key = "parcels.all.labelparams"
         else:
-            key = "parcels_add_labelparams_{}".format(labelparam_counter)
+            key = "parcels.add.labelparams.{}".format(labelparam_counter)
 
         query = {
             "label_type__uuid": "495706f7-0f59-4eaf-a4d8-bf65946b7c62",
-            "name": lp,
+            "name": lp.replace(".","_"),
             "end": None,
         }
         matchdic = {"object_id": "object_id"}
-        coldic = {"value": lp}
+        coldic = {"value": lp.replace(".","_")}
         l = [
             "geoblocks.geometry.sources.AddDjangoFields",
-            "parcels_add_labelparams_{}".format(labelparam_counter - 1),
+            "parcels.add.labelparams.{}".format(labelparam_counter - 1),
             "lizard_nxt",
             "labelparameter",
             query,
@@ -105,8 +103,8 @@ def main():  # pragma: no cover
 
     # Create seriesblocks
     for lp in labelparams:
-        key = "{}_seriesblock".format(lp)
-        l = ["geoblocks.geometry.base.GetSeriesBlock", "parcels_all_labelparams", lp]
+        key = "{}.seriesblock".format(lp)
+        l = ["geoblocks.geometry.base.GetSeriesBlock", "parcels.all.labelparams", lp.replace(".","_")]
         graph[key] = l
 
     # Specific for plant growth
@@ -143,12 +141,12 @@ def main():  # pragma: no cover
             upper_bounds_complete.append(bound)
             upper_bounds_complete.append(outside_upper)
 
-        lower_key = "{}_lower".format(index)
-        upper_key = "{}_upper".format(index)
+        lower_key = "{}.lower".format(index)
+        upper_key = "{}.upper".format(index)
 
         lower_block = [
             "geoblocks.geometry.field_operations.Classify",
-            "plant_age_months",
+            "plant.age.months",
             period_list,
             lower_bounds_complete,
             True,
@@ -156,7 +154,7 @@ def main():  # pragma: no cover
 
         upper_block = [
             "geoblocks.geometry.field_operations.Classify",
-            "plant_age_months",
+            "plant.age.months",
             period_list,
             upper_bounds_complete,
             True,
@@ -167,64 +165,63 @@ def main():  # pragma: no cover
 
     l = [
         "geoblocks.geometry.field_operations.Classify",
-        "plant_age_months",
+        "plant.age.months",
         period_list,
         [0, 1000, 1, 2000, 2, 3000, 3],
-            True,
+        True,
     ]
 
-    graph["periodscore_withlow"] = l
+    graph["periodscore.withlow"] = l
 
-    l = ["geoblocks.geometry.field_operations.Less", "periodscore_withlow", 50]
+    l = ["geoblocks.geometry.field_operations.Less", "periodscore.withlow", 50]
 
-    graph["periodscore_lownumbers"] = l
+    graph["periodscore.lownumbers"] = l
 
     l = [
         "geoblocks.geometry.field_operations.Mask",
-        "periodscore_withlow",
-        "periodscore_lownumbers",
+        "periodscore.withlow",
+        "periodscore.lownumbers",
         0,
     ]
 
     graph["periodscore"] = l
 
-
     # Create classification Geometryblock, with all classification columns
     key = "classificationblock"
-    l = ["geoblocks.geometry.base.SetSeriesBlock", "parcels_all_labelparams"]
+    l = ["geoblocks.geometry.base.SetSeriesBlock", "parcels.all.labelparams"]
     for index, row in periods.iterrows():
-        l.append("{}_lower_column".format(index))
-        l.append("{}_lower".format(index))
-        l.append("{}_upper_column".format(index))
-        l.append("{}_upper".format(index))
+        l.append("{}.lower.column".format(index))
+        l.append("{}.lower".format(index))
+        l.append("{}.upper.column".format(index))
+        l.append("{}.upper".format(index))
 
     graph[key] = l
 
     # Classify parameters
     for index, row in periods.iterrows():
-        key = "{}_classified".format(index)
-        key_round = "{}_round".format(index)
+        key = "{}.classified".format(index)
+        key_round = "{}.round".format(index)
         l = [
             "geoblocks.geometry.field_operations.ClassifyFromColumns",
             "classificationblock",
-            index,
-            ["{}_lower_column".format(index), "{}_upper_column".format(index)],
+            index.replace(".","_"),
+            ["{}.lower.column".format(index), "{}.upper.column".format(index)],
             [300, 100, 200],
             True,
         ]
 
         l_round = [
             "geoblocks.geometry.field_operations.Round",
-            "{}_classified".format(index),
+            "{}.classified".format(index),
         ]
         graph[key] = l
         graph[key_round] = l_round
 
     for index, row in periods.iterrows():
-        key = "{}_score".format(index)
+        key = "{}.score".format(index)
         l = [
             "geoblocks.geometry.field_operations.Add",
-            "{}_round".format(index),
+            "{}.round".format(index),
             "periodscore",
         ]
 
@@ -233,23 +230,25 @@ def main():  # pragma: no cover
     for index, row in periods.iterrows():
         growth_parameter_codes = growth_codes[growth_codes["parameter"] == index]
 
-        key = "{}_taskid_decimals".format(index)
+        key = "{}.taskid.decimals".format(index)
         bins = list(growth_parameter_codes["Score"])
-        labels = [0] + list(growth_parameter_codes["Task_id"])  # Prepend zero for outliers
+        labels = [0] + list(
+            growth_parameter_codes["Task_id"]
+        )  # Prepend zero for outliers
 
         l = [
             "geoblocks.geometry.field_operations.Classify",
-            "{}_score".format(index),
+            "{}.score".format(index),
             bins,
             labels,
             False,
         ]
         graph[key] = l
 
-        key_round = "{}_taskid_block".format(index)
+        key_round = "{}.taskid.block".format(index)
         l_round = [
             "geoblocks.geometry.field_operations.Round",
-            "{}_taskid_decimals".format(index),
+            "{}.taskid.decimals".format(index),
         ]
 
         graph[key_round] = l_round
@@ -269,7 +268,7 @@ def main():  # pragma: no cover
 
     for index, row in periods.iterrows():
         for return_column in growth_return_columns:
-            key = "{}_{}_block".format(index, return_column)
+            key = "{}.{}.block".format(index.replace("_","."), return_column)
             bins = list(growth_info.index)
             growth_info["tempcol"] = (
                 growth_info["strindex"] + "_" + growth_info[return_column]
@@ -277,51 +276,55 @@ def main():  # pragma: no cover
             labels = list(growth_info["tempcol"]) + ["Unknown"]
             l = [
                 "dask_geomodeling.geometry.field_operations.Classify",
-                "{}_taskid_block".format(index),
+                "{}.taskid.block".format(index),
                 bins,
                 labels,
                 True,
             ]
             graph[key] = l
 
-
     # Plant health specific
     # Multiply all conditions with a factor
-    factor = [1000, 100, 0, 1]
-    conditions = ["stem_appearance", "leaves_color", "hanging_rigidly", "vigor_appearance"]
-    counter = 0
-    for cond in conditions:
-        key = "{}_multiplied".format(cond)
+    factors = [1000, 100, 10, 1]
+    conditions = [
+        "stem.appearance",
+        "leaves.color",
+        "vigor.appearance",
+        "berry.appearance"
+    ]
+    
+    for factor, cond in zip(factors, conditions):
+    
+        key = "{}.multiplied".format(cond)
         l = [
             "geoblocks.geometry.field_operations.Multiply",
-            "{}_seriesblock".format(cond),
-            factor[counter],
+            "{}.seriesblock".format(cond),
+            factor,
         ]
-        counter += 1
         graph[key] = l
 
     # Sum all conditions
     for i in range(len(conditions) - 1):
         if i < len(conditions) - 2:
-            key = "cond_add_{}".format(i + 1)
+            key = "cond.add.{}".format(i + 1)
         elif i == len(conditions) - 2:
-            key = "conditions_sum"
+            key = "conditions.sum"
 
         if i == 0:
-            sum_base = "{}_multiplied".format(conditions[i])
+            sum_base = "{}.multiplied".format(conditions[i])
         else:
-            sum_base = "cond_add_{}".format(i)
+            sum_base = "cond.add.{}".format(i)
 
         l = [
             "geoblocks.geometry.field_operations.Add",
             sum_base,
-            "{}_multiplied".format(conditions[i + 1]),
+            "{}.multiplied".format(conditions[i + 1]),
         ]
 
         graph[key] = l
 
     # Classify to task_ids
-    key = "health_taskid_block"
+    key = "health.taskid.block"
     bins = list(health_codes["Code"])[
         1:
     ]  # Drop first value as everything lower than 1102 gets label healthy
@@ -329,7 +332,7 @@ def main():  # pragma: no cover
 
     l = [
         "dask_geomodeling.geometry.field_operations.Classify",
-        "conditions_sum",
+        "conditions.sum",
         bins,
         labels,
         False,
@@ -350,13 +353,15 @@ def main():  # pragma: no cover
     ]
 
     for return_column in health_return_columns:
-        key = "health_{}_block".format(return_column)
+        key = "health.{}.block".format(return_column.replace("_","."))
         bins = list(health_info.index)
-        health_info["tempcol"] = health_info["strindex"] + "_" + health_info[return_column]
+        health_info["tempcol"] = (
+            health_info["strindex"] + "_" + health_info[return_column]
+        )
         labels = list(health_info["tempcol"]) + ["Unknown"]
         l = [
             "dask_geomodeling.geometry.field_operations.Classify",
-            "health_taskid_block",
+            "health.taskid.block",
             bins,
             labels,
             True,
@@ -366,37 +371,44 @@ def main():  # pragma: no cover
     # result block
     result_block = [
         "geoblocks.geometry.base.SetSeriesBlock",
-        "parcels_all_labelparams",
+        "parcels.all.labelparams",
         "label_value",
         "label",
         "plant age (months)",
-        "plant_age_months",
+        "plant.age.months",
         "----task_plant_growth_params-----",
         "-",
     ]
 
     for index, row in names.iterrows():
-        result_block.append(index + "_task_id")
-        result_block.append("{}_taskid_block".format(index))
+        result_block.append(index.replace(".","_") + "_task_id")
+        result_block.append("{}.taskid.block".format(index))
         for return_column in growth_return_columns:
-            result_block.append("{}_{}".format(index, return_column))
-            result_block.append("{}_{}_block".format(index, return_column))
+            result_block.append("{}_{}".format(index.replace(".","_"), return_column))
+            result_block.append("{}.{}.block".format(index.replace("_","."), return_column))
 
     result_block.append("----task_plant_health_params-----")
     result_block.append("-")
     result_block.append("health_task_id")
-    result_block.append("health_taskid_block")
+    result_block.append("health.taskid.block")
+    
 
     for return_column in health_return_columns:
         result_block.append("health_{}".format(return_column))
-        result_block.append("health_{}_block".format(return_column))
+        result_block.append("health.{}.block".format(return_column.replace("_",".")))
 
-    # add graph to source
+
+
+    # # add graph to source
     graph["result"] = result_block
     source["graph"] = graph
+    
+    
+    with open("growth_health_tasks.json", "w+") as f:
+        json.dump(source ,f)
 
     r = patch_labeltype(source, username, password, labeltype_uuid)
-    print(r.json())
+    logging.info(r.json())
 
 
 if __name__ == "__main__":

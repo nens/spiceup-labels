@@ -8,6 +8,7 @@ Daily label computation (GET compute from mobile app) ensures that warnings reac
 
 import argparse
 import logging
+import json
 import dask_geomodeling as dg
 import gspread
 import logging
@@ -40,15 +41,43 @@ from spiceup_labels.config_lizard import (
     patch_labeltype,
 )
 
-# List tasks
-def get_tasks_seriesblock(warning_tasks):
-    # raster manipulations (TODO create LizardRasterSource when decent alternative for below is available)
-    soil_moisture_wet = misc.Reclassify(
-        irrigate_01_warning, [[5, 1]], True
+def check_rainy_season(
+        days_since_epoch_raster_sb,
+        doy_start_dry_season_raster_sb,
+        doy_start_rainy_season_raster_sb
+        ):
+    
+    doy_now_sb = Round(Modulo(days_since_epoch_raster_sb, 365.25))
+    days_until_jan_1_sb = doy_now_sb * -1 + 365.25
+    
+    #Calculate days until dry season
+    doy_start_dry_season_sb = Round(doy_start_dry_season_raster_sb)
+    pos_days_until_dry_season_sb = days_until_jan_1_sb + doy_start_dry_season_sb
+    days_until_dry_season_sb = Modulo(pos_days_until_dry_season_sb, 365.25)
+    days_since_start_dry_season_sb = Modulo(
+        (pos_days_until_dry_season_sb * -1 + 365.25), 365.25
     )
-    shade_warning = soil_moisture_wet * 1  # TODO improve
-    pests_warning = misc.Mask(soil_moisture_wet, 0)  #  * 1 # TODO improve
-    dg_rasters_result = {"shade_warning": shade_warning, "pests_warning": pests_warning}
+
+    #Calculate days until wet season
+    doy_start_rainy_season_sb = Round(doy_start_rainy_season_raster_sb)
+    pos_days_until_rainy_season_sb = days_until_jan_1_sb + doy_start_rainy_season_sb
+    days_until_rainy_season_sb = Modulo(pos_days_until_rainy_season_sb, 365.25)
+    days_since_start_rainy_season_sb = Modulo(
+        (pos_days_until_rainy_season_sb * -1 + 365.25), 365.25
+    )
+
+    #true/false rainy season
+    rainy_season = days_since_start_rainy_season_sb < days_since_start_dry_season_sb
+    
+    return rainy_season
+
+
+# List tasks
+def get_tasks_seriesblock(warning_tasks, rainy_season):
+    # raster manipulations (TODO create LizardRasterSource when decent alternative for below is available)
+    shade_warning = dry_soil_warning * 1  # TODO improve
+    
+    dg_rasters_result = {"shade_warning": shade_warning}
     sb_objects_results = raster_seriesblocks(dg_rasters_result, parcels_labeled)
     globals().update(sb_objects_results)
     # calculate localized input data to determine if there is a warning
@@ -56,38 +85,44 @@ def get_tasks_seriesblock(warning_tasks):
     plant_age_01 = plant_age < 365.25
     plant_age_13 = (plant_age > 365.25) * (plant_age < (365.25 * 3))
     plant_age_3p = plant_age > (365.25 * 3)
-    irrigate_01 = irrigate_01_warning_sb * plant_age_01
-    irrigate_13 = irrigate_13_warning_sb * plant_age_13
-    irrigate_3p = irrigate_3p_warning_sb * plant_age_3p
-    irrigate_warning = irrigate_01 + irrigate_13 + irrigate_3p
-    irrigate_numeric = field_operations.Mask(irrigate_warning, (irrigation_sb == 1), 0)
+
+    irrigate_warning = dry_soil_warning_sb + very_dry_soil_warning_sb
+    irrigate_dry_season = field_operations.Mask(irrigate_warning, rainy_season, 0)
+    irrigate_numeric = field_operations.Mask(irrigate_dry_season, (irrigation_sb == 1), 0)
     shade_task = field_operations.Mask(shade_warning_sb, (shade_sb == 1), 0)
-    pests_task = field_operations.Mask(pests_warning_sb, (pests_sb == 1), 0)
+
+    foot_rot_disease_task = field_operations.Mask(foot_rot_disease_raster_sb, (foot_rot_disease_sb == 1), 0)
+    yellow_disease_task = field_operations.Mask(yellow_disease_raster_sb, (yellow_disease_sb == 1), 0)
+    viral_disease_task = field_operations.Mask(viral_disease_raster_sb, (viral_disease_sb == 1), 0)
+    pepper_bug_task = field_operations.Mask(pepper_bug_raster_sb, (pepper_bug_sb == 1), 0)
+    stem_borer_task = field_operations.Mask(stem_borer_raster_sb, (stem_borer_sb == 1), 0)
+    tingid_bug_task = field_operations.Mask(tingid_bug_raster_sb, (tingid_bug_sb == 1), 0)
+    velvet_blight_task = field_operations.Mask(velvet_blight_raster_sb, (velvet_blight_sb == 1), 0)
+
     heavy_rain_task = field_operations.Mask(
         heavy_rain_warning_sb, (drainage_sb == 1), 0
     )
     very_heavy_rain_task = field_operations.Mask(
         very_heavy_rain_warning_sb, (drainage_sb == 1), 0
     )
+    
+    drainage_task = heavy_rain_task + very_heavy_rain_task
 
     # calc valid task ids, return 0 or task_id
-    # TODO improve P&D risk model
     # the following vars are used in: task_id_lp = eval(f"task_id_{lp_df}")
     task_id_irrigation = field_operations.Classify(
-        irrigate_numeric, [30, 50, 100], [0, 2001, 2002, 2003]
+        irrigate_numeric, [1, 2], [0, 2001, 2002]
     )
     task_id_shade = field_operations.Classify(shade_task, [1], [0, 2004])
-    task_id_pests = field_operations.Classify(pests_task, [1], [0, 2005])
-    task_id_heavy_rain = field_operations.Classify(pests_task, [1], [0, 2005])
-    task_id_very_heavy_rain = field_operations.Classify(pests_task, [1], [0, 2005])
-    task_id_drainage = field_operations.Classify(pests_task, [1, 2], [0, 2006, 2007])
-    task_id_foot_rot = field_operations.Classify(pests_task, [1], [0, 2008])
-    task_id_yellow_disease = field_operations.Classify(pests_task, [1], [0, 2009])
-    task_id_viral_disease = field_operations.Classify(pests_task, [1], [0, 2010])
-    task_id_pepper_bug = field_operations.Classify(pests_task, [1], [0, 2011])
-    task_id_pepper_stem_borer = field_operations.Classify(pests_task, [1], [0, 2012])
-    task_id_tingid_bug = field_operations.Classify(pests_task, [1], [0, 2013])
-    task_id_velvet_blight = field_operations.Classify(pests_task, [1], [0, 2014])
+    #task_id_pests = field_operations.Classify(pests_task, [1], [0, 2005])
+    task_id_drainage = field_operations.Classify(drainage_task, [1, 2], [0, 2006, 2007])
+    task_id_foot_rot_disease = field_operations.Classify(foot_rot_disease_task, [1], [0, 2008], False)
+    task_id_yellow_disease = field_operations.Classify(yellow_disease_task, [1], [0, 2009], False)
+    task_id_viral_disease = field_operations.Classify(viral_disease_task, [1], [0, 2010], False)
+    task_id_pepper_bug = field_operations.Classify(pepper_bug_task, [1], [0, 2011], False)
+    task_id_stem_borer = field_operations.Classify(stem_borer_task, [1], [0, 2012], False)
+    task_id_tingid_bug = field_operations.Classify(tingid_bug_task, [1], [0, 2013], False)
+    task_id_velvet_blight = field_operations.Classify(velvet_blight_task, [1], [0, 2014], False)
 
     tasks_seriesblock = [
         "_XL_",
@@ -108,7 +143,7 @@ def get_tasks_seriesblock(warning_tasks):
                 for task_id, value in zip(task_ids, list(df_rows[col])):
                     result_classes.append(f"{task_id}_{value}")
                 result_name = f"{lp_df}_{col}"
-                result = field_operations.Classify(task_id_lp, task_ids, result_classes)
+                result = field_operations.Classify(task_id_lp, task_ids, result_classes, False)
                 tasks_seriesblock.append(result_name)
                 tasks_seriesblock.append(result)
         else:
@@ -162,8 +197,17 @@ def main():  # pragma: no cover
     sb_objects = raster_seriesblocks(dg_rasters, parcels)
     globals().update(sb_objects)
     globals().update(lp_seriesblocks)
+    
+    logging.info("Calculate if rainy season")
+    rainy_season = check_rainy_season(
+        days_since_epoch_raster_sb,
+        doy_start_dry_season_raster_sb,
+        doy_start_rainy_season_raster_sb
+        )
+    
+    logging.info("Calculate tasks")
 
-    tasks_seriesblock = get_tasks_seriesblock(warning_tasks)
+    tasks_seriesblock = get_tasks_seriesblock(warning_tasks, rainy_season)
     # Create seriesblock
     sb_parcels = [
         parcels_labeled,
@@ -178,6 +222,8 @@ def main():  # pragma: no cover
     logger.info("serialize model and replace local data with lizard data")
     dg_source = get_labeltype_source(result_seriesblock, graph_rasters, labeled_parcels)
     logger.info("update the labeltype model")
+    with open("warning_based_tasks.json", "w+") as f:
+        json.dump(dg_source ,f)
     response = patch_labeltype(dg_source, username, password, labeltype_uuid)
     logger.info("Labeltype update complete. Find response below")
     logger.info(response.json())

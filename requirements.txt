@@ -1,12 +1,13 @@
 # python packages from the web :)
 geopandas
+gdal
 gspread
 numpy
 oauth2client
-osgeo
 pandas
 simplejson
 dask-geomodeling
+xlrd==1.2.0
 
 # Install ourselves (".") in editable ("-e") mode. Include the test ([test])
 # dependencies.

@@ -1,5 +1,6 @@
 import requests
 import simplejson
+import logging
 from dask_geomodeling.raster import *
 from dask_geomodeling.geometry import *
 from dask_geomodeling.geometry.aggregate import AggregateRaster
@@ -105,3 +106,12 @@ def patch_labeltype(dg_source, username, password, labeltype_uuid):
         data=simplejson.dumps(source, ignore_nan=True),
     )
     return response
+
+def configure_logger(loglevel):
+    logger = logging.getLogger("labellogger")
+    logger.setLevel(loglevel)
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    sh = logging.StreamHandler()
+    sh.setLevel(loglevel)
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)

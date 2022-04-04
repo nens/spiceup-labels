@@ -5,6 +5,7 @@
 *.whl
 *.json
 *.xlsx
+MARTIJN_LEESDIT.rst
 
 # Pyc/pyo/backup files.
 *.py[co]
@@ -28,6 +29,7 @@ venv/
 bin/
 lib/
 pyvenv.cfg
+Scripts/
 
 # Unit test / coverage reports
 .coverage
